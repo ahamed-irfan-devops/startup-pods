@@ -189,13 +189,14 @@ export const Login = () => {
                 <div
                   style={{
                     position: 'absolute',
-                    left: '0.85rem',
+                    left: '0.9rem',
                     top: '50%',
                     transform: 'translateY(-50%)',
                     color: focusedInput === 'email' ? '#2563EB' : '#94A3B8',
                     transition: 'color 0.15s ease',
                     display: 'flex',
-                    alignItems: 'center'
+                    alignItems: 'center',
+                    pointerEvents: 'none'
                   }}
                 >
                   <Mail size={18} />
@@ -203,8 +204,9 @@ export const Login = () => {
                 <input
                   type="email"
                   className="form-input"
+                  autoComplete="username"
                   style={{
-                    paddingLeft: '2.6rem',
+                    paddingLeft: '2.8rem',
                     paddingRight: '0.85rem',
                     height: '46px',
                     borderColor: focusedInput === 'email' ? '#2563EB' : '#CBD5E1',
@@ -216,7 +218,7 @@ export const Login = () => {
                   onChange={(e) => setEmail(e.target.value)}
                   onFocus={() => setFocusedInput('email')}
                   onBlur={() => setFocusedInput(null)}
-                  placeholder="irfan@thestartuppark.com"
+                  placeholder="name@company.com"
                 />
               </div>
             </div>
@@ -230,13 +232,14 @@ export const Login = () => {
                 <div
                   style={{
                     position: 'absolute',
-                    left: '0.85rem',
+                    left: '0.9rem',
                     top: '50%',
                     transform: 'translateY(-50%)',
                     color: focusedInput === 'password' ? '#2563EB' : '#94A3B8',
                     transition: 'color 0.15s ease',
                     display: 'flex',
-                    alignItems: 'center'
+                    alignItems: 'center',
+                    pointerEvents: 'none'
                   }}
                 >
                   <Lock size={18} />
@@ -244,8 +247,9 @@ export const Login = () => {
                 <input
                   type={showPassword ? 'text' : 'password'}
                   className="form-input"
+                  autoComplete="current-password"
                   style={{
-                    paddingLeft: '2.6rem',
+                    paddingLeft: '2.8rem',
                     paddingRight: '2.75rem',
                     height: '46px',
                     borderColor: focusedInput === 'password' ? '#2563EB' : '#CBD5E1',
