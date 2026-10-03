@@ -41,7 +41,7 @@ router.get('/summary', authenticateToken, requireRole('CENTRAL_ADMIN', 'SUPER_AD
     const todayConfirmedBookings = await db.prepare(`
       SELECT id, start_time, end_time FROM bookings
       WHERE cabin_id = ? AND booking_date = ? AND status = 'CONFIRMED'
-    `).all(c.id);
+    `).all(c.id, todayStr);
 
     const activeBooking = todayConfirmedBookings.find(b => {
       const s = timeToMinutes(b.start_time);
