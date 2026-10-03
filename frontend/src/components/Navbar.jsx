@@ -22,64 +22,32 @@ export const Navbar = ({ mobileMenuOpen, setMobileMenuOpen }) => {
   };
 
   return (
-    <header
-      style={{
-        background: '#0F172A',
-        borderBottom: '1px solid #1E293B',
-        padding: '0.75rem 1.5rem',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '0.5rem',
-        position: 'sticky',
-        top: 0,
-        zIndex: 100
-      }}
-    >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <header className="app-header">
+      <div className="navbar-container">
         {/* Brand & Mobile Menu Button */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+        <div className="navbar-brand-wrapper">
           {user && (
             <button
               className="mobile-toggle-btn"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              style={{
-                background: '#1E293B',
-                border: '1px solid #334155',
-                color: '#FFFFFF',
-                padding: '0.4rem 0.6rem',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                display: 'none' // Controlled by CSS media query
-              }}
               title="Toggle Menu"
             >
               {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
           )}
 
-          <div
-            style={{
-              background: '#FFFFFF',
-              borderRadius: '8px',
-              padding: '4px 10px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
-              flexShrink: 0
-            }}
-          >
+          <div className="navbar-logo-badge">
             <img
               src="/startup-pods-logo.png"
               alt="iQue Startup Pods Logo"
-              style={{ height: '32px', width: 'auto', objectFit: 'contain' }}
+              className="navbar-logo-img"
             />
           </div>
-          <div>
-            <h1 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#FFFFFF', lineHeight: 1.2, letterSpacing: '-0.01em' }}>
+          <div className="navbar-brand-text">
+            <h1 className="navbar-title">
               iQue Startup Pods
             </h1>
-            <p style={{ fontSize: '0.75rem', color: '#94A3B8' }}>
+            <p className="navbar-subtitle">
               Bengaluru Facility • Shared Office Pods Management
             </p>
           </div>
@@ -87,40 +55,17 @@ export const Navbar = ({ mobileMenuOpen, setMobileMenuOpen }) => {
 
         {/* User Actions */}
         {user && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <div className="navbar-user-actions">
             {/* Notification Bell */}
             <div style={{ position: 'relative' }}>
               <button
                 onClick={() => setShowNotifications(!showNotifications)}
-                style={{
-                  position: 'relative',
-                  background: '#1E293B',
-                  border: '1px solid #334155',
-                  padding: '0.5rem',
-                  borderRadius: '8px',
-                  color: '#FFFFFF',
-                  cursor: 'pointer'
-                }}
+                className="navbar-icon-btn"
+                title="Notifications"
               >
-                <Bell size={18} />
+                <Bell size={18} className="bell-icon" />
                 {unreadCount > 0 && (
-                  <span
-                    style={{
-                      position: 'absolute',
-                      top: '-4px',
-                      right: '-4px',
-                      background: '#DC2626',
-                      color: '#FFFFFF',
-                      fontSize: '0.65rem',
-                      fontWeight: 700,
-                      width: '18px',
-                      height: '18px',
-                      borderRadius: '50%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}
-                  >
+                  <span className="navbar-unread-badge">
                     {unreadCount}
                   </span>
                 )}
@@ -129,6 +74,7 @@ export const Navbar = ({ mobileMenuOpen, setMobileMenuOpen }) => {
               {/* Notifications Dropdown Panel */}
               {showNotifications && (
                 <div
+                  className="notifications-dropdown"
                   style={{
                     position: 'absolute',
                     top: '45px',
@@ -146,7 +92,7 @@ export const Navbar = ({ mobileMenuOpen, setMobileMenuOpen }) => {
                   }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', borderBottom: '1px solid #E2E8F0', paddingBottom: '0.5rem' }}>
-                    <h4 style={{ fontSize: '0.9rem', fontWeight: 600, color: '#0F172A' }}>Notifications</h4>
+                    <h4 style={{ fontSize: '0.9rem', fontWeight: 600, color: '#0F172A', margin: 0 }}>Notifications</h4>
                     {unreadCount > 0 && (
                       <button
                         onClick={markAllNotificationsRead}
@@ -158,7 +104,7 @@ export const Navbar = ({ mobileMenuOpen, setMobileMenuOpen }) => {
                   </div>
 
                   {notifications.length === 0 ? (
-                    <p style={{ fontSize: '0.8rem', color: '#64748B', textAlign: 'center', padding: '1rem' }}>No notifications yet.</p>
+                    <p style={{ fontSize: '0.8rem', color: '#64748B', textAlign: 'center', padding: '1rem', margin: 0 }}>No notifications yet.</p>
                   ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                       {notifications.map(n => (
@@ -179,7 +125,7 @@ export const Navbar = ({ mobileMenuOpen, setMobileMenuOpen }) => {
                               {new Date(n.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </span>
                           </div>
-                          <p style={{ fontSize: '0.75rem', color: '#475569', marginTop: '2px' }}>{n.message}</p>
+                          <p style={{ fontSize: '0.75rem', color: '#475569', marginTop: '2px', margin: 0 }}>{n.message}</p>
                         </div>
                       ))}
                     </div>
@@ -189,26 +135,19 @@ export const Navbar = ({ mobileMenuOpen, setMobileMenuOpen }) => {
             </div>
 
             {/* Profile Info */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#FFFFFF', whiteSpace: 'nowrap' }}>
+            <div className="navbar-profile-wrapper">
+              <div className="navbar-user-text">
+                <div className="navbar-user-name">
                   {user.name}
                 </div>
-                <div style={{ fontSize: '0.7rem', color: '#94A3B8', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
+                <div className="navbar-user-role">
                   {getRoleBadge(user.role)}
                 </div>
               </div>
 
               <button
                 onClick={() => setShowLogoutModal(true)}
-                style={{
-                  background: '#1E293B',
-                  border: '1px solid #334155',
-                  padding: '0.5rem',
-                  borderRadius: '8px',
-                  color: '#94A3B8',
-                  cursor: 'pointer'
-                }}
+                className="navbar-icon-btn"
                 title="Log Out"
               >
                 <LogOut size={16} />

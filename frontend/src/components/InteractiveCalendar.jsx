@@ -116,8 +116,8 @@ export const InteractiveCalendar = ({ userRole, onSelectSlotToBook }) => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
       {/* Calendar Top Control Header */}
-      <div className="glass-card" style={{ padding: '1rem 1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+      <div className="glass-card calendar-controls-wrapper" style={{ padding: '1rem 1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
+        <div className="calendar-controls-left" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
           <button className="btn btn-secondary btn-sm" onClick={() => changeDate(-1)}>
             <ChevronLeft size={16} /> Prev
           </button>
@@ -212,7 +212,7 @@ export const InteractiveCalendar = ({ userRole, onSelectSlotToBook }) => {
       </div>
 
       {/* Legend */}
-      <div style={{ display: 'flex', gap: '1.25rem', fontSize: '0.8rem', flexWrap: 'wrap', alignItems: 'center' }}>
+      <div className="calendar-legend-container">
         <span style={{ color: '#475569', fontWeight: 600 }}>Status Key:</span>
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', color: '#166534', fontWeight: 600 }}>
           <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#166534' }}></span> Available
@@ -230,7 +230,7 @@ export const InteractiveCalendar = ({ userRole, onSelectSlotToBook }) => {
 
       {/* Timeline Grid (5 Cabins x Dynamic Columns) */}
       {viewMode === 'day' && (
-        <div className="glass-card" style={{ padding: '1rem', overflowX: 'auto' }}>
+        <div className="glass-card calendar-table-card" style={{ padding: '1rem', overflowX: 'auto' }}>
           {visibleTimeSlots.length === 0 ? (
             <div style={{ padding: '2rem', textAlign: 'center', background: '#FFFBEB', borderRadius: '8px', border: '1px solid #FDE68A' }}>
               <p style={{ fontSize: '0.95rem', fontWeight: 600, color: '#92400E' }}>
@@ -241,14 +241,14 @@ export const InteractiveCalendar = ({ userRole, onSelectSlotToBook }) => {
               </p>
             </div>
           ) : (
-            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: visibleTimeSlots.length * 70 + 160 + 'px' }}>
+            <table className="calendar-grid-table" style={{ width: '100%', borderCollapse: 'collapse', minWidth: visibleTimeSlots.length * 60 + 110 + 'px' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid #E2E8F0', background: '#F8FAFC' }}>
-                  <th style={{ width: '160px', padding: '0.75rem 0.5rem', textTransform: 'uppercase', fontSize: '0.75rem', color: '#475569', fontWeight: 600, letterSpacing: '0.05em', textAlign: 'left', position: 'sticky', left: 0, background: '#F8FAFC', zIndex: 2 }}>
+                  <th className="calendar-cabin-col-header" style={{ width: '160px', padding: '0.75rem 0.5rem', textTransform: 'uppercase', fontSize: '0.75rem', color: '#475569', fontWeight: 600, letterSpacing: '0.05em', textAlign: 'left', position: 'sticky', left: 0, background: '#F8FAFC', zIndex: 2 }}>
                     Cabin Name
                   </th>
                   {visibleTimeSlots.map(h => (
-                    <th key={h} style={{ padding: '0.6rem 0.3rem', fontSize: '0.75rem', color: h.endsWith(':30') ? '#2563EB' : '#475569', fontWeight: h.endsWith(':30') ? 700 : 600, textAlign: 'center', background: h.endsWith(':30') ? '#EFF6FF' : 'transparent' }}>
+                    <th key={h} className="calendar-slot-th" style={{ padding: '0.6rem 0.3rem', fontSize: '0.75rem', color: h.endsWith(':30') ? '#2563EB' : '#475569', fontWeight: h.endsWith(':30') ? 700 : 600, textAlign: 'center', background: h.endsWith(':30') ? '#EFF6FF' : 'transparent' }}>
                       {h}
                     </th>
                   ))}
@@ -263,7 +263,7 @@ export const InteractiveCalendar = ({ userRole, onSelectSlotToBook }) => {
                   </tr>
                 ) : cabins.map(c => (
                   <tr key={c.id} style={{ borderBottom: '1px solid #F1F5F9' }}>
-                    <td style={{ padding: '0.75rem 0.5rem', position: 'sticky', left: 0, background: '#FFFFFF', zIndex: 1, boxShadow: '2px 0 5px rgba(0,0,0,0.02)' }}>
+                    <td className="calendar-cabin-col-cell" style={{ padding: '0.75rem 0.5rem', position: 'sticky', left: 0, background: '#FFFFFF', zIndex: 1, boxShadow: '2px 0 5px rgba(0,0,0,0.02)' }}>
                       <div style={{ fontWeight: 600, color: '#0F172A', fontSize: '0.85rem' }}>{c.name}</div>
                       <div style={{ fontSize: '0.7rem', color: '#64748B' }}>Cap: {c.capacity}</div>
                       {c.status === 'MAINTENANCE' && (

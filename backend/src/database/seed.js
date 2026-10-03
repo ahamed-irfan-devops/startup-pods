@@ -15,8 +15,8 @@ async function seedDatabase() {
     // 1. Ensure booking rules
     await pool.query(`
       INSERT INTO booking_rules (id, min_duration_minutes, max_duration_minutes, step_minutes, allow_auto_approval, cancellation_cutoff_minutes, office_start_time, office_end_time, operating_days)
-      VALUES (1, 30, 120, 30, 0, 30, '09:00', '18:00', 'Mon,Tue,Wed,Thu,Fri')
-      ON CONFLICT (id) DO NOTHING;
+      VALUES (1, 30, 120, 30, 0, 30, '09:00', '18:00', 'Mon,Tue,Wed,Thu,Fri,Sat')
+      ON CONFLICT (id) DO UPDATE SET operating_days = EXCLUDED.operating_days;
     `);
 
     // 2. Super Admin
@@ -30,19 +30,25 @@ async function seedDatabase() {
       ON CONFLICT (email) DO NOTHING;
     `).run(adminEmail, adminPasswordHash);
 
-    // 3. Initial Cabins
+    // 3. Configured Cabins
     const defaultCabins = [
-      { name: 'Executive Suite A', location: 'Floor 1, Wing A', capacity: 12, description: 'High-level executive meeting room with video conferencing.', amenities: JSON.stringify(['Projector', 'Video Conf', 'Whiteboard', 'Air Conditioning']) },
-      { name: 'Innovation Hub', location: 'Floor 2, Wing B', capacity: 8, description: 'Creative brainstorming cabin equipped with smart TV.', amenities: JSON.stringify(['Smart TV', 'Whiteboard', 'Coffee Machine']) },
-      { name: 'Boardroom One', location: 'Floor 3, Executive Tower', capacity: 20, description: 'Large capacity boardroom for company presentations and key meetings.', amenities: JSON.stringify(['Projector', 'Sound System', 'Video Conf', 'Whiteboard']) }
+      { name: 'DUBAI', location: 'Floor 3', capacity: 12, description: 'High-level executive meeting room .', amenities: JSON.stringify(['Whiteboard', 'Air Conditioning']), image_url: null },
+      { name: 'PARIS', location: 'Floor 3', capacity: 6, description: 'Meeting Room', amenities: JSON.stringify(['Whiteboard', 'Air Conditioning']), image_url: null },
+      { name: 'Training Room 1', location: 'Floor 3', capacity: 20, description: 'Large capacity space for company presentations and key meetings.', amenities: JSON.stringify(['Projector', 'Smart Tv', 'Whiteboard', 'Air Conditioning']), image_url: null },
+      { name: 'Training Room 2', location: 'Floor 3', capacity: 35, description: 'High Tech Conference Space ', amenities: JSON.stringify(['Whiteboard', 'Air Conditioning', 'Projector']), image_url: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80' }
     ];
 
     for (const c of defaultCabins) {
       await db.prepare(`
-        INSERT INTO cabins (name, location, capacity, description, amenities)
-        VALUES (?, ?, ?, ?, ?)
-        ON CONFLICT (name) DO NOTHING;
-      `).run(c.name, c.location, c.capacity, c.description, c.amenities);
+        INSERT INTO cabins (name, location, capacity, description, amenities, image_url)
+        VALUES (?, ?, ?, ?, ?, ?)
+        ON CONFLICT (name) DO UPDATE SET
+          location = EXCLUDED.location,
+          capacity = EXCLUDED.capacity,
+          description = EXCLUDED.description,
+          amenities = EXCLUDED.amenities,
+          image_url = EXCLUDED.image_url;
+      `).run(c.name, c.location, c.capacity, c.description, c.amenities, c.image_url);
     }
 
     console.log('✅ PostgreSQL Database seeding completed.');
