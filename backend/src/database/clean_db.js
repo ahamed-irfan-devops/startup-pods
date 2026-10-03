@@ -1,10 +1,15 @@
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
+require('dotenv').config({ path: path.resolve(__dirname, '../../../.env') });
+
 const bcrypt = require('bcryptjs');
-const { pool, db } = require('./db');
+const { pool, db, initDatabase } = require('./db');
 
 async function cleanDatabase() {
   console.log('🧹 Clearing all database tables in PostgreSQL...');
 
   try {
+    await initDatabase();
     await pool.query(`
       TRUNCATE notifications, audit_logs, bookings, users, companies RESTART IDENTITY CASCADE;
     `);

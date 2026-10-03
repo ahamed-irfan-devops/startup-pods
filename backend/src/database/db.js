@@ -1,9 +1,15 @@
+const path = require('path');
+const dotenv = require('dotenv');
+
+// Load .env from backend directory or root directory
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
+
 const { Pool } = require('pg');
 const fs = require('fs');
-const path = require('path');
 
 const connectionString = process.env.DATABASE_URL || 
-  `postgresql://${process.env.POSTGRES_USER || 'booking_admin'}:${process.env.POSTGRES_PASSWORD || 'CHANGE_THIS_PASSWORD'}@${process.env.POSTGRES_HOST || 'postgres'}:${process.env.POSTGRES_PORT || 5432}/${process.env.POSTGRES_DB || 'booking_system'}`;
+  `postgresql://${process.env.POSTGRES_USER || 'booking_admin'}:${process.env.POSTGRES_PASSWORD || 'CHANGE_THIS_PASSWORD'}@${process.env.POSTGRES_HOST || '127.0.0.1'}:${process.env.POSTGRES_PORT || 5432}/${process.env.POSTGRES_DB || 'booking_system'}`;
 
 const pool = new Pool({
   connectionString,
@@ -53,7 +59,7 @@ function prepare(sql) {
     },
     async run(...params) {
       const flatParams = params.flat();
-      let querySql = convertedSql;
+      let querySql = convertedSql.trim().replace(/;+$/, '');
       
       // If INSERT and doesn't have RETURNING, append RETURNING id to get lastInsertRowid
       if (/^\s*INSERT\s+/i.test(querySql) && !/RETURNING/i.test(querySql)) {
@@ -95,7 +101,7 @@ async function withTransaction(fn) {
           },
           async run(...params) {
             const flatParams = params.flat();
-            let querySql = convertedSql;
+            let querySql = convertedSql.trim().replace(/;+$/, '');
             if (/^\s*INSERT\s+/i.test(querySql) && !/RETURNING/i.test(querySql)) {
               querySql += ' RETURNING id';
             }

@@ -151,10 +151,6 @@ async function sendBookingSubmissionEmail({ toEmail, hrName, companyName, bookin
               <td style="padding: 6px 0; color: #64748b;">Purpose:</td>
               <td style="padding: 6px 0; color: #0f172a;">${purpose}</td>
             </tr>
-            <tr>
-              <td style="padding: 6px 0; color: #64748b;">Attendees:</td>
-              <td style="padding: 6px 0; color: #0f172a;">${peopleCount} People</td>
-            </tr>
           </table>
         </div>
 
@@ -173,7 +169,7 @@ async function sendBookingSubmissionEmail({ toEmail, hrName, companyName, bookin
  */
 async function sendBookingApprovalEmail({ toEmail, hrName, companyName, bookingCode, cabinName, cabinLocation, date, startTime, endTime, purpose, peopleCount }) {
   const subject = `✅ APPROVED: Pod Booking ${bookingCode} (${cabinName})`;
-  const text = `Hello ${hrName || 'HR Admin'},\n\nGreat news! Your booking request ${bookingCode} for ${companyName} has been APPROVED by Central Admin.\n\nPod: ${cabinName} (${cabinLocation || 'Bengaluru Facility'})\nDate: ${date}\nTime Slot: ${startTime} - ${endTime}\nMeeting Title: ${purpose}\nAttendees: ${peopleCount} People\n\nThank you for using iQue Startup Pods!`;
+  const text = `Hello ${hrName || 'HR Admin'},\n\nGreat news! Your booking request ${bookingCode} for ${companyName} has been APPROVED by Central Admin.\n\nPod: ${cabinName} (${cabinLocation || 'Bengaluru Facility'})\nDate: ${date}\nTime Slot: ${startTime} - ${endTime}\nMeeting Title: ${purpose}\n\nThank you for using iQue Startup Pods!`;
 
   const html = `
     <div style="font-family: 'Inter', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; color: #0f172a;">
@@ -216,10 +212,6 @@ async function sendBookingApprovalEmail({ toEmail, hrName, companyName, bookingC
             <tr>
               <td style="padding: 6px 0; color: #64748b;">Purpose:</td>
               <td style="padding: 6px 0; color: #0f172a;">${purpose}</td>
-            </tr>
-            <tr>
-              <td style="padding: 6px 0; color: #64748b;">Attendees:</td>
-              <td style="padding: 6px 0; color: #0f172a;">${peopleCount} People</td>
             </tr>
           </table>
         </div>

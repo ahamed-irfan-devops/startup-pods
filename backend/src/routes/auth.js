@@ -168,14 +168,18 @@ router.post('/activate-account', async (req, res) => {
   if (!/[A-Z]/.test(password)) {
     return res.status(400).json({ error: 'Password must contain at least one uppercase letter (A-Z).' });
   }
-  if (!/[a-z]/.test(password)) {
-    return res.status(400).json({ error: 'Password must contain at least one lowercase letter (a-z).' });
-  }
-  if (!/[0-9]/.test(password)) {
-    return res.status(400).json({ error: 'Password must contain at least one number (0-9).' });
-  }
-  if (!/[^A-Za-z0-9]/.test(password)) {
-    return res.status(400).json({ error: 'Password must contain at least one special character (!@#$%^&*).' });
+
+  const WEAK_PASSWORDS = [
+    'password', 'password123', 'password1234', 'pass1234', 'password12345',
+    'admin123', 'admin1234', 'administrator', '12345678', '123456789', '1234567890',
+    'qwertyuiop', 'qwerty123', 'welcome123', 'welcome1', 'letmein123', 'letmein1',
+    'superadmin', 'superadmin123', 'startuppark', 'ique1234', 'abc12345',
+    'p@ssword', 'p@ssword123', 'admin@123', 'password@123'
+  ];
+
+  const lowerPass = password.toLowerCase().trim();
+  if (WEAK_PASSWORDS.includes(lowerPass) || lowerPass.startsWith('password') || lowerPass.startsWith('admin123')) {
+    return res.status(400).json({ error: 'Password is too common or simple. Please choose a unique, secure password.' });
   }
 
   try {

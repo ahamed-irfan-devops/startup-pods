@@ -6,16 +6,20 @@ export const AuditLogsPage = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [actionFilter, setActionFilter] = useState('');
+  const [daysFilter, setDaysFilter] = useState('30');
 
   useEffect(() => {
     fetchLogs();
-  }, [actionFilter]);
+  }, [actionFilter, daysFilter]);
 
   const fetchLogs = async () => {
     setLoading(true);
     try {
-      let url = '/audit-logs';
-      if (actionFilter) url += `?action=${actionFilter}`;
+      const params = new URLSearchParams();
+      if (daysFilter) params.append('days', daysFilter);
+      if (actionFilter) params.append('action', actionFilter);
+
+      const url = `/audit-logs?${params.toString()}`;
       const res = await apiRequest(url);
       setLogs(res.logs || []);
     } catch (err) {
@@ -39,7 +43,7 @@ export const AuditLogsPage = () => {
       <div>
         <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#0F172A', letterSpacing: '-0.01em' }}>Facility Audit Trail</h2>
         <p style={{ fontSize: '0.875rem', color: '#64748B' }}>
-          Immutable activity log recording all user actions, booking status transitions, cabin updates, and system configuration edits.
+          Activity log recording user actions, booking status transitions, cabin updates, and system configuration edits. Records older than 30 days are automatically deleted.
         </p>
       </div>
 
@@ -55,7 +59,15 @@ export const AuditLogsPage = () => {
           />
         </div>
 
-        <select className="form-select" style={{ width: '220px' }} value={actionFilter} onChange={(e) => setActionFilter(e.target.value)}>
+        <select className="form-select" style={{ width: '170px' }} value={daysFilter} onChange={(e) => setDaysFilter(e.target.value)}>
+          <option value="30">Last 30 Days</option>
+          <option value="7">Last 7 Days</option>
+          <option value="60">Last 60 Days</option>
+          <option value="90">Last 90 Days</option>
+          <option value="all">All Time</option>
+        </select>
+
+        <select className="form-select" style={{ width: '200px' }} value={actionFilter} onChange={(e) => setActionFilter(e.target.value)}>
           <option value="">All Action Types</option>
           <option value="BOOKING_SUBMITTED">BOOKING_SUBMITTED</option>
           <option value="BOOKING_APPROVED">BOOKING_APPROVED</option>

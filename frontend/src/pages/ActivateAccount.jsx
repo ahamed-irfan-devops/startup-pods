@@ -48,15 +48,21 @@ export const ActivateAccount = ({ onGoToLogin }) => {
     }
   };
 
+  const WEAK_PASSWORDS = [
+    'password', 'password123', 'password1234', 'pass1234', 'password12345',
+    'admin123', 'admin1234', 'administrator', '12345678', '123456789', '1234567890',
+    'qwertyuiop', 'qwerty123', 'welcome123', 'welcome1', 'letmein123', 'letmein1',
+    'superadmin', 'superadmin123', 'startuppark', 'ique1234', 'abc12345'
+  ];
+  const lowerP = password.toLowerCase().trim();
+  const isWeak = WEAK_PASSWORDS.includes(lowerP) || lowerP.startsWith('password') || lowerP.startsWith('admin123');
+
   // Password Requirements Validation
   const hasMinLen = password.length >= 8;
   const hasUpper = /[A-Z]/.test(password);
-  const hasLower = /[a-z]/.test(password);
-  const hasNum = /[0-9]/.test(password);
-  const hasSpecial = /[^A-Za-z0-9]/.test(password);
   const isMatch = password.length > 0 && password === confirmPassword;
 
-  const isFormValid = hasMinLen && hasUpper && hasLower && hasNum && hasSpecial && isMatch;
+  const isFormValid = hasMinLen && hasUpper && !isWeak && isMatch;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -340,23 +346,17 @@ export const ActivateAccount = ({ onGoToLogin }) => {
             {/* Password Requirement Checklist */}
             <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', padding: '0.85rem', borderRadius: '8px', marginBottom: '1.25rem' }}>
               <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '0.5rem' }}>
-                Password Requirements:
+                Password Policy:
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.35rem', fontSize: '0.75rem' }}>
                 <span style={{ color: hasMinLen ? '#166534' : '#64748B', fontWeight: hasMinLen ? 600 : 400 }}>
                   {hasMinLen ? '✓' : '•'} Min 8 characters
                 </span>
                 <span style={{ color: hasUpper ? '#166534' : '#64748B', fontWeight: hasUpper ? 600 : 400 }}>
-                  {hasUpper ? '✓' : '•'} Uppercase letter (A-Z)
+                  {hasUpper ? '✓' : '•'} 1 Uppercase letter (A-Z)
                 </span>
-                <span style={{ color: hasLower ? '#166534' : '#64748B', fontWeight: hasLower ? 600 : 400 }}>
-                  {hasLower ? '✓' : '•'} Lowercase letter (a-z)
-                </span>
-                <span style={{ color: hasNum ? '#166534' : '#64748B', fontWeight: hasNum ? 600 : 400 }}>
-                  {hasNum ? '✓' : '•'} Number (0-9)
-                </span>
-                <span style={{ color: hasSpecial ? '#166534' : '#64748B', fontWeight: hasSpecial ? 600 : 400 }}>
-                  {hasSpecial ? '✓' : '•'} Special char (!@#$)
+                <span style={{ color: password.length > 0 && !isWeak ? '#166534' : isWeak ? '#DC2626' : '#64748B', fontWeight: password.length > 0 ? 600 : 400 }}>
+                  {isWeak ? '✕ Too common' : '✓ Unique password'}
                 </span>
                 <span style={{ color: isMatch ? '#166534' : '#64748B', fontWeight: isMatch ? 600 : 400 }}>
                   {isMatch ? '✓' : '•'} Passwords match

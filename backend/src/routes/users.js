@@ -69,7 +69,7 @@ router.post('/', authenticateToken, requireRole('SUPER_ADMIN', 'CENTRAL_ADMIN'),
     if (comp) companyName = comp.name;
   }
 
-  const passwordToUse = (password && password.trim()) ? password.trim() : 'password123';
+  const passwordToUse = (password && password.trim()) ? password.trim() : 'StartupPod@2026';
   const hash = bcrypt.hashSync(passwordToUse, 10);
 
   try {

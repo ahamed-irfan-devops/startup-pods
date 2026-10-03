@@ -1,10 +1,17 @@
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
+require('dotenv').config({ path: path.resolve(__dirname, '../../../.env') });
+
 const bcrypt = require('bcryptjs');
-const { pool, db } = require('./db');
+const { pool, db, initDatabase } = require('./db');
 
 async function seedDatabase() {
   console.log('🌱 Seeding PostgreSQL database...');
 
   try {
+    // 0. Initialize schema tables if they don't exist
+    await initDatabase();
+
     // 1. Ensure booking rules
     await pool.query(`
       INSERT INTO booking_rules (id, min_duration_minutes, max_duration_minutes, step_minutes, allow_auto_approval, cancellation_cutoff_minutes, office_start_time, office_end_time, operating_days)

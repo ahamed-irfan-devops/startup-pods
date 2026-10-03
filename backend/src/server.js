@@ -1,6 +1,9 @@
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
+require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
+
 const express = require('express');
 const cors = require('cors');
-const path = require('path');
 const { initDatabase } = require('./database/db');
 
 const authRoutes = require('./routes/auth');
@@ -44,6 +47,18 @@ app.use((err, req, res, next) => {
 
 // Initialize database schema and start server
 initDatabase().then(() => {
+  const { db } = require('./database/db');
+
+  // Daily audit log cleanup (removes audit logs older than 30 days)
+  const cleanAuditLogs = () => {
+    db.exec(`DELETE FROM audit_logs WHERE created_at < NOW() - INTERVAL '30 days'`)
+      .then(() => console.log('🧹 Daily Audit Trail maintenance: Records older than 30 days pruned.'))
+      .catch(err => console.error('Audit pruning error:', err.message));
+  };
+
+  cleanAuditLogs(); // Run on startup
+  setInterval(cleanAuditLogs, 24 * 60 * 60 * 1000); // Run every 24 hours
+
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Cabin Booking System Backend running on port ${PORT}`);
   });

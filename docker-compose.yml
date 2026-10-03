@@ -5,6 +5,8 @@ services:
     image: postgres:16-alpine
     container_name: booking_postgres
     restart: unless-stopped
+    ports:
+      - "5432:5432"
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-booking_system}
       POSTGRES_USER: ${POSTGRES_USER:-booking_admin}

@@ -37,10 +37,19 @@ export async function apiRequest(endpoint, options = {}, bodyData = null) {
     localStorage.removeItem('cabin_booking_user');
   }
 
-  const data = await response.json();
+  let data = {};
+  const text = await response.text();
+
+  if (text) {
+    try {
+      data = JSON.parse(text);
+    } catch (err) {
+      data = { error: text || `Server error (${response.status})` };
+    }
+  }
 
   if (!response.ok) {
-    throw new Error(data.error || 'An error occurred while processing your request.');
+    throw new Error(data.error || `Request failed with status ${response.status}`);
   }
 
   return data;
