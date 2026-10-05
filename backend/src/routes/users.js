@@ -159,9 +159,9 @@ router.post('/:id/resend-invitation', authenticateToken, requireRole('SUPER_ADMI
 
 /**
  * PUT /api/users/:id
- * Super Admin updates user account
+ * Super Admin & Central Admin updates user account
  */
-router.put('/:id', authenticateToken, requireRole('SUPER_ADMIN'), async (req, res) => {
+router.put('/:id', authenticateToken, requireRole('SUPER_ADMIN', 'CENTRAL_ADMIN'), async (req, res) => {
   const userId = req.params.id;
   const { name, email, password, role, company_id, status } = req.body;
 
@@ -195,9 +195,9 @@ router.put('/:id', authenticateToken, requireRole('SUPER_ADMIN'), async (req, re
 
 /**
  * DELETE /api/users/:id
- * Super Admin deletes user account
+ * Super Admin & Central Admin deletes user account
  */
-router.delete('/:id', authenticateToken, requireRole('SUPER_ADMIN'), async (req, res) => {
+router.delete('/:id', authenticateToken, requireRole('SUPER_ADMIN', 'CENTRAL_ADMIN'), async (req, res) => {
   const userId = parseInt(req.params.id);
 
   if (req.user.id === userId) {

@@ -41,9 +41,9 @@ router.get('/', authenticateToken, requireRole('SUPER_ADMIN', 'CENTRAL_ADMIN'), 
 
 /**
  * POST /api/companies
- * Super Admin creates company AND optional initial Company HR user account simultaneously with invitation email
+ * Super Admin & Central Admin creates company AND optional initial Company HR user account simultaneously with invitation email
  */
-router.post('/', authenticateToken, requireRole('SUPER_ADMIN'), async (req, res) => {
+router.post('/', authenticateToken, requireRole('SUPER_ADMIN', 'CENTRAL_ADMIN'), async (req, res) => {
   const { name, email, phone, status, create_hr, hr_name, hr_email, hr_password } = req.body;
 
   if (!name || !email) {
@@ -126,9 +126,9 @@ router.post('/', authenticateToken, requireRole('SUPER_ADMIN'), async (req, res)
 
 /**
  * PUT /api/companies/:id
- * Super Admin updates company or toggles status (ACTIVE/INACTIVE)
+ * Super Admin & Central Admin updates company or toggles status (ACTIVE/INACTIVE)
  */
-router.put('/:id', authenticateToken, requireRole('SUPER_ADMIN'), async (req, res) => {
+router.put('/:id', authenticateToken, requireRole('SUPER_ADMIN', 'CENTRAL_ADMIN'), async (req, res) => {
   const companyId = req.params.id;
   const { name, email, phone, status } = req.body;
 
@@ -160,9 +160,9 @@ router.put('/:id', authenticateToken, requireRole('SUPER_ADMIN'), async (req, re
 
 /**
  * DELETE /api/companies/:id
- * Super Admin deletes company and associated HR accounts & bookings
+ * Super Admin & Central Admin deletes company and associated HR accounts & bookings
  */
-router.delete('/:id', authenticateToken, requireRole('SUPER_ADMIN'), async (req, res) => {
+router.delete('/:id', authenticateToken, requireRole('SUPER_ADMIN', 'CENTRAL_ADMIN'), async (req, res) => {
   const companyId = req.params.id;
 
   const existing = await db.prepare('SELECT * FROM companies WHERE id = ?').get(companyId);
