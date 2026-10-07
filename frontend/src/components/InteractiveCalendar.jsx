@@ -72,6 +72,19 @@ export const InteractiveCalendar = ({ userRole, onSelectSlotToBook }) => {
     setSelectedDate(newDateStr);
   };
 
+  const slots15Min = [
+    '08:00', '08:15', '08:30', '08:45',
+    '09:00', '09:15', '09:30', '09:45',
+    '10:00', '10:15', '10:30', '10:45',
+    '11:00', '11:15', '11:30', '11:45',
+    '12:00', '12:15', '12:30', '12:45',
+    '13:00', '13:15', '13:30', '13:45',
+    '14:00', '14:15', '14:30', '14:45',
+    '15:00', '15:15', '15:30', '15:45',
+    '16:00', '16:15', '16:30', '16:45',
+    '17:00', '17:15', '17:30', '17:45'
+  ];
+
   const slots30Min = [
     '08:00', '08:30', '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
     '12:00', '12:30', '13:00', '13:30', '14:00', '14:30', '15:00', '15:30',
@@ -82,8 +95,8 @@ export const InteractiveCalendar = ({ userRole, onSelectSlotToBook }) => {
     '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'
   ];
 
-  const currentSlots = slotGranularity === '30min' ? slots30Min : slots1Hr;
-  const slotDuration = slotGranularity === '30min' ? 30 : 60;
+  const currentSlots = slotGranularity === '15min' ? slots15Min : (slotGranularity === '30min' ? slots30Min : slots1Hr);
+  const slotDuration = slotGranularity === '15min' ? 15 : (slotGranularity === '30min' ? 30 : 60);
 
   const getBookingForSlot = (cabinId, hourStr) => {
     const [h, m] = hourStr.split(':').map(Number);
@@ -160,6 +173,22 @@ export const InteractiveCalendar = ({ userRole, onSelectSlotToBook }) => {
 
           {/* Granularity Switcher */}
           <div style={{ display: 'flex', background: '#F1F5F9', padding: '3px', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
+            <button
+              onClick={() => setSlotGranularity('15min')}
+              style={{
+                padding: '0.3rem 0.65rem',
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                borderRadius: '6px',
+                border: 'none',
+                background: slotGranularity === '15min' ? '#2563EB' : 'transparent',
+                color: slotGranularity === '15min' ? '#FFFFFF' : '#64748B',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              15-Min Grid
+            </button>
             <button
               onClick={() => setSlotGranularity('30min')}
               style={{
@@ -241,17 +270,20 @@ export const InteractiveCalendar = ({ userRole, onSelectSlotToBook }) => {
               </p>
             </div>
           ) : (
-            <table className="calendar-grid-table" style={{ width: '100%', borderCollapse: 'collapse', minWidth: visibleTimeSlots.length * 60 + 110 + 'px' }}>
+            <table className="calendar-grid-table" style={{ width: '100%', borderCollapse: 'collapse', minWidth: visibleTimeSlots.length * 55 + 110 + 'px' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid #E2E8F0', background: '#F8FAFC' }}>
                   <th className="calendar-cabin-col-header" style={{ width: '160px', padding: '0.75rem 0.5rem', textTransform: 'uppercase', fontSize: '0.75rem', color: '#475569', fontWeight: 600, letterSpacing: '0.05em', textAlign: 'left', position: 'sticky', left: 0, background: '#F8FAFC', zIndex: 2 }}>
                     Cabin Name
                   </th>
-                  {visibleTimeSlots.map(h => (
-                    <th key={h} className="calendar-slot-th" style={{ padding: '0.6rem 0.3rem', fontSize: '0.75rem', color: h.endsWith(':30') ? '#2563EB' : '#475569', fontWeight: h.endsWith(':30') ? 700 : 600, textAlign: 'center', background: h.endsWith(':30') ? '#EFF6FF' : 'transparent' }}>
-                      {h}
-                    </th>
-                  ))}
+                  {visibleTimeSlots.map(h => {
+                    const isHourOrHalf = h.endsWith(':00') || h.endsWith(':30');
+                    return (
+                      <th key={h} className="calendar-slot-th" style={{ padding: '0.6rem 0.25rem', fontSize: '0.75rem', color: isHourOrHalf ? '#2563EB' : '#64748B', fontWeight: isHourOrHalf ? 700 : 500, textAlign: 'center', background: isHourOrHalf ? '#EFF6FF' : 'transparent' }}>
+                        {h}
+                      </th>
+                    );
+                  })}
                 </tr>
               </thead>
               <tbody>

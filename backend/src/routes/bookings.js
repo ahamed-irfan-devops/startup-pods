@@ -128,11 +128,12 @@ router.get('/availability', authenticateToken, async (req, res) => {
     WHERE b.cabin_id = ? AND b.booking_date = ? AND b.status IN ('CONFIRMED', 'PENDING')
   `).all(cabin_id, date);
 
-  // Generate 30-min interval slots between office start and end
+  // Generate interval slots between office start and end
   const slots = [];
   const startMin = timeToMinutes(rules.office_start_time);
   const endMin = timeToMinutes(rules.office_end_time);
-  const step = rules.step_minutes;
+  const requestedStep = req.query.step ? parseInt(req.query.step) : null;
+  const step = requestedStep && [15, 30, 60].includes(requestedStep) ? requestedStep : rules.step_minutes;
 
   for (let m = startMin; m < endMin; m += step) {
     const slotStartH = String(Math.floor(m / 60)).padStart(2, '0');

@@ -105,6 +105,7 @@ export const RulesConfigPage = () => {
             <div className="form-group">
               <label className="form-label">Minimum Booking Duration (Minutes)</label>
               <select className="form-select" value={minDuration} onChange={(e) => setMinDuration(e.target.value)}>
+                <option value="15">15 Minutes</option>
                 <option value="30">30 Minutes</option>
                 <option value="60">60 Minutes (1 Hour)</option>
               </select>

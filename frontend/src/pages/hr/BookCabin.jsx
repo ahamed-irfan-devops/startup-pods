@@ -26,25 +26,49 @@ export const BookCabin = ({ setActiveTab, preselectedCabinId, preselectedStartHo
   const [cabins, setCabins] = useState([]);
   const [_rules, setRules] = useState(null);
 
+  const [gridStep, setGridStep] = useState(15); // 15, 30, or 60 min intervals
+
   const computeEndTime = (startStr) => {
-    if (!startStr) return '11:00';
+    if (!startStr) return '09:30';
     const [h, m] = startStr.split(':').map(Number);
-    const endH = String(h + 1).padStart(2, '0');
-    const endM = String(m).padStart(2, '0');
+    const stepM = gridStep;
+    const totalEndMin = h * 60 + m + stepM;
+    const endH = String(Math.floor(totalEndMin / 60)).padStart(2, '0');
+    const endM = String(totalEndMin % 60).padStart(2, '0');
     return `${endH}:${endM}`;
   };
 
   const getNextUpcomingTime = () => {
     const now = new Date();
     const currentMin = now.getHours() * 60 + now.getMinutes();
-    const nextStep = Math.ceil((currentMin + 1) / 30) * 30;
+    const stepM = gridStep;
+    const nextStep = Math.ceil((currentMin + 1) / stepM) * stepM;
     const h = Math.floor(nextStep / 60);
     const m = nextStep % 60;
     if (h >= 18) return '09:00';
-    const startHStr = String(Math.max(9, h)).padStart(2, '0');
+    const startHStr = String(Math.max(8, h)).padStart(2, '0');
     const startMStr = String(m).padStart(2, '0');
     return `${startHStr}:${startMStr}`;
   };
+
+  const generateTimeOptions = () => {
+    const step = gridStep;
+    const startHour = 8;
+    const endHour = 18;
+    const options = [];
+    for (let m = startHour * 60; m <= endHour * 60; m += step) {
+      const h = Math.floor(m / 60);
+      const min = m % 60;
+      const val = `${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}`;
+      const period = h >= 12 ? 'PM' : 'AM';
+      const h12 = h % 12 === 0 ? 12 : (h > 12 ? h - 12 : h);
+      const label = `${val} (${String(h12).padStart(2, '0')}:${String(min).padStart(2, '0')} ${period})`;
+      options.push({ value: val, label });
+    }
+    return options;
+  };
+
+  const timeOptions = generateTimeOptions();
 
   const defaultStart = preselectedStartHour || getNextUpcomingTime();
 
@@ -88,7 +112,7 @@ export const BookCabin = ({ setActiveTab, preselectedCabinId, preselectedStartHo
       setSelectedSlotKeys([]);
       checkAvailability();
     }
-  }, [cabinId, bookingDate]);
+  }, [cabinId, bookingDate, gridStep]);
 
   const fetchInitialData = async () => {
     try {
@@ -110,7 +134,7 @@ export const BookCabin = ({ setActiveTab, preselectedCabinId, preselectedStartHo
     if (!cabinId || !bookingDate) return;
     setCheckingAvailability(true);
     try {
-      const res = await apiRequest(`/bookings/availability?cabin_id=${cabinId}&date=${bookingDate}`);
+      const res = await apiRequest(`/bookings/availability?cabin_id=${cabinId}&date=${bookingDate}&step=${gridStep}`);
       setAvailability(res);
     } catch (err) {
       console.error(err);
@@ -357,26 +381,38 @@ export const BookCabin = ({ setActiveTab, preselectedCabinId, preselectedStartHo
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
               <div className="form-group">
                 <label className="form-label">Start Time</label>
-                <input
-                  type="time"
-                  className="form-input"
-                  step="1800"
+                <select
+                  className="form-select"
                   value={startTime}
-                  onChange={(e) => setStartTime(e.target.value)}
+                  onChange={(e) => {
+                    const newStart = e.target.value;
+                    setStartTime(newStart);
+                    setEndTime(computeEndTime(newStart));
+                  }}
                   required
-                />
+                >
+                  {timeOptions.map(opt => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="form-group">
                 <label className="form-label">End Time</label>
-                <input
-                  type="time"
-                  className="form-input"
-                  step="1800"
+                <select
+                  className="form-select"
                   value={endTime}
                   onChange={(e) => setEndTime(e.target.value)}
                   required
-                />
+                >
+                  {timeOptions.filter(opt => opt.value > startTime).map(opt => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
 
@@ -421,19 +457,78 @@ export const BookCabin = ({ setActiveTab, preselectedCabinId, preselectedStartHo
         {/* Real-time Cabin Availability Grid Panel with Slot Selection */}
         <div className="glass-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
               <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: '#0F172A' }}>Live Cabin Availability Grid</h3>
-              {selectedSlotKeys.length > 0 && (
-                <button
-                  className="btn btn-secondary btn-xs"
-                  onClick={() => setSelectedSlotKeys([])}
-                  style={{ fontSize: '0.72rem', padding: '0.2rem 0.5rem' }}
-                >
-                  Clear Selection ({selectedSlotKeys.length})
-                </button>
-              )}
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                {/* Grid Interval Switcher */}
+                <div style={{ display: 'flex', background: '#F1F5F9', padding: '3px', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
+                  <button
+                    type="button"
+                    onClick={() => setGridStep(15)}
+                    style={{
+                      padding: '0.25rem 0.55rem',
+                      fontSize: '0.72rem',
+                      fontWeight: 600,
+                      borderRadius: '6px',
+                      border: 'none',
+                      background: gridStep === 15 ? '#2563EB' : 'transparent',
+                      color: gridStep === 15 ? '#FFFFFF' : '#64748B',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    15-Min Grid
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setGridStep(30)}
+                    style={{
+                      padding: '0.25rem 0.55rem',
+                      fontSize: '0.72rem',
+                      fontWeight: 600,
+                      borderRadius: '6px',
+                      border: 'none',
+                      background: gridStep === 30 ? '#2563EB' : 'transparent',
+                      color: gridStep === 30 ? '#FFFFFF' : '#64748B',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    30-Min Grid
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setGridStep(60)}
+                    style={{
+                      padding: '0.25rem 0.55rem',
+                      fontSize: '0.72rem',
+                      fontWeight: 600,
+                      borderRadius: '6px',
+                      border: 'none',
+                      background: gridStep === 60 ? '#2563EB' : 'transparent',
+                      color: gridStep === 60 ? '#FFFFFF' : '#64748B',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    1-Hour Grid
+                  </button>
+                </div>
+
+                {selectedSlotKeys.length > 0 && (
+                  <button
+                    type="button"
+                    className="btn btn-secondary btn-xs"
+                    onClick={() => setSelectedSlotKeys([])}
+                    style={{ fontSize: '0.72rem', padding: '0.2rem 0.5rem' }}
+                  >
+                    Clear ({selectedSlotKeys.length})
+                  </button>
+                )}
+              </div>
             </div>
-            <p style={{ fontSize: '0.8rem', color: '#64748B', marginTop: '2px' }}>
+            <p style={{ fontSize: '0.8rem', color: '#64748B', marginTop: '4px' }}>
               Checking slots for <strong style={{ color: '#0F172A' }}>{selectedCabinObj?.name}</strong> on {bookingDate}
             </p>
           </div>
