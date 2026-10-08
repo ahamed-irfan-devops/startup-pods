@@ -235,16 +235,30 @@ export const BookCabin = ({ setActiveTab, preselectedCabinId, preselectedStartHo
 
     try {
       // 1. Revalidate live availability from backend before confirming
-      const latestAvailability = await apiRequest(`/bookings/availability?cabin_id=${cabinId}&date=${bookingDate}`);
+      const latestAvailability = await apiRequest(`/bookings/availability?cabin_id=${cabinId}&date=${bookingDate}&step=${gridStep}`);
+
+      // Helper function to convert time string HH:MM to minutes
+      const timeToMin = (t) => {
+        const [h, m] = t.split(':').map(Number);
+        return h * 60 + m;
+      };
 
       // Verify that all selected slots are still available
       const unavailableSlots = selectedSlotObjects.filter(selSlot => {
-        const freshSlot = (latestAvailability.slots || []).find(s => s.start_time === selSlot.start_time && s.end_time === selSlot.end_time);
-        return !freshSlot || freshSlot.status !== 'AVAILABLE';
+        const selStart = timeToMin(selSlot.start_time);
+        const selEnd = timeToMin(selSlot.end_time);
+
+        const overlappingSlots = (latestAvailability.slots || []).filter(s => {
+          const sStart = timeToMin(s.start_time);
+          const sEnd = timeToMin(s.end_time);
+          return sStart < selEnd && sEnd > selStart;
+        });
+
+        return overlappingSlots.length === 0 || overlappingSlots.some(s => s.status !== 'AVAILABLE');
       });
 
       if (unavailableSlots.length > 0) {
-        setModalError(`One or more selected slots (${unavailableSlots.map(s => s.start_time).join(', ')}) was just booked by another user. Please re-select available slots.`);
+        setModalError(`One or more selected slots (${unavailableSlots.map(s => s.start_time).join(', ')}) is unavailable or conflicts with another booking. Please re-select available slots.`);
         checkAvailability(); // Refresh UI grid
         setSubmitting(false);
         return;
@@ -744,12 +758,18 @@ export const BookCabin = ({ setActiveTab, preselectedCabinId, preselectedStartHo
             </label>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', maxHeight: '140px', overflowY: 'auto' }}>
               {selectedSlotObjects.length > 0 ? (
-                selectedSlotObjects.map((slot, idx) => (
-                  <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0.75rem', background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 600, color: '#1E40AF' }}>
-                    <span>{slot.start_time} - {slot.end_time}</span>
-                    <span style={{ fontSize: '0.72rem', color: '#2563EB', fontWeight: 700 }}>30 mins</span>
-                  </div>
-                ))
+                selectedSlotObjects.map((slot, idx) => {
+                  const [sH, sM] = slot.start_time.split(':').map(Number);
+                  const [eH, eM] = slot.end_time.split(':').map(Number);
+                  const durMin = (eH * 60 + eM) - (sH * 60 + sM);
+                  const durText = durMin >= 60 ? `${durMin / 60} hour${durMin > 60 ? 's' : ''}` : `${durMin} mins`;
+                  return (
+                    <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0.75rem', background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 600, color: '#1E40AF' }}>
+                      <span>{slot.start_time} - {slot.end_time}</span>
+                      <span style={{ fontSize: '0.72rem', color: '#2563EB', fontWeight: 700 }}>{durText}</span>
+                    </div>
+                  );
+                })
               ) : (
                 <div style={{ padding: '0.5rem 0.75rem', background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 600, color: '#1E40AF' }}>
                   {startTime} - {endTime}

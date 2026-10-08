@@ -90,16 +90,17 @@ async function validateBookingRules(cabinId, bookingDate, startTime, endTime) {
   const durationMin = endMin - startMin;
 
   // 3. Validate min/max duration
-  if (durationMin < rules.min_duration_minutes) {
-    return { valid: false, error: `Minimum booking duration is ${rules.min_duration_minutes} minutes.` };
+  const minDurationAllowed = Math.min(rules.min_duration_minutes || 15, 15);
+  if (durationMin < minDurationAllowed) {
+    return { valid: false, error: `Minimum booking duration is ${minDurationAllowed} minutes.` };
   }
   if (durationMin > rules.max_duration_minutes) {
     return { valid: false, error: `Maximum booking duration is ${rules.max_duration_minutes / 60} hours (${rules.max_duration_minutes} mins).` };
   }
 
-  // 4. Validate time step increments (e.g. 30 minutes)
-  if (startMin % rules.step_minutes !== 0 || endMin % rules.step_minutes !== 0) {
-    return { valid: false, error: `Start and end times must be in ${rules.step_minutes}-minute increments.` };
+  // 4. Validate time step increments (15 minutes)
+  if (startMin % 15 !== 0 || endMin % 15 !== 0) {
+    return { valid: false, error: `Start and end times must be in 15-minute increments.` };
   }
 
   // 5. Validate Office Hours
